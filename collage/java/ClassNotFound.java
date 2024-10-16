@@ -1,8 +1,9 @@
-public class ClassNotFoundExample {
+public class ClassNotFound {
 
-    public static void findClass(String className) throws ClassNotFoundException {
+    public static void findClass(String className) 
+    throws ClassNotFoundException {
        
-        Class.forName(className);  
+       
         
         System.out.println("Class " + className + " loaded successfully.");
     }
@@ -18,8 +19,6 @@ public class ClassNotFoundExample {
            
             System.out.println("Error: Class not found - " + e.getMessage());
         } 
-        finally {
-            System.out.println("Execution of try-catch-finally is complete.");
-        }
+       
     }
 }
