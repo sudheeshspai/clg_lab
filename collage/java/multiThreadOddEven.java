@@ -1,8 +1,8 @@
 import java.util.*;
 
 class SharedNumber {
-    private int number;
-    private boolean isEven;
+    public int number;
+    public  boolean isEven;
 
     public synchronized void setNumber(int number) {
         this.number = number;
