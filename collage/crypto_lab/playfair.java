@@ -6,7 +6,7 @@ import java.util.*;
  * which cipher to use. It contains methods for both encryption and decryption
  * for each cipher.
  */
-public class CipherLab {
+public class playfair {
 
     // Main method to run the program
     public static void main(String[] args) {
@@ -341,4 +341,5 @@ public class CipherLab {
         return plaintext.toString();
     }
 }
+
 
