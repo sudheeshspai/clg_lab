@@ -1,6 +1,4 @@
-import java.util.Scanner;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Main class for a menu-driven Playfair and Rail Fence cipher program.
@@ -343,3 +341,4 @@ public class CipherLab {
         return plaintext.toString();
     }
 }
+
