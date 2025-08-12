@@ -1,8 +1,5 @@
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.util.Base64;
-import java.util.Scanner;
+import javax.crypto.*;
+import java.util.*;
 
 /**
  * A menu-driven program for DES (Data Encryption Standard) encryption and decryption.
@@ -76,10 +73,10 @@ public class DESCipherProgram {
     public static String encrypt(String plaintext, SecretKey key) throws Exception {
         // Create a Cipher instance with the DES algorithm
         /*DES: This is the algorithm being used. It stands for Data Encryption Standard, a symmetric-key block cipher that was widely used in the past. It works by encrypting data in fixed-size blocks.
-
-ECB: This is the mode of operation. It stands for Electronic Codebook. In this mode, each block of plaintext is encrypted independently using the same key. It's the simplest mode, but it can be less secure for larger messages because identical blocks of plaintext will result in identical blocks of ciphertext, which can reveal patterns.
-
-PKCS5Padding: This is the padding scheme. Since block ciphers like DES work on fixed-size blocks (8 bytes for DES), padding is needed to make sure the plaintext is a multiple of the block size. This specific padding adds a series of bytes to the end of the plaintext to fill out the last block. The value of each added byte indicates the number of bytes that were added. */
+         ECB: This is the mode of operation. It stands for Electronic Codebook. In this mode, each block of plaintext is encrypted independently using the same key. It's the simplest mode, but it can be
+         less secure for larger messages because identical blocks of plaintext will result in identical blocks of ciphertext, which can reveal patterns.
+        PKCS5Padding: This is the padding scheme. Since block ciphers like DES work on fixed-size blocks (8 bytes for DES), padding is needed to make sure the plaintext is a multiple of the block size. 
+        This specific padding adds a series of bytes to the end of the plaintext to fill out the last block. The value of each added byte indicates the number of bytes that were added. */
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
 
         // Initialize the cipher for encryption mode with the key
@@ -113,3 +110,4 @@ PKCS5Padding: This is the padding scheme. Since block ciphers like DES work on f
         return new String(decryptedBytes);
     }
 }
+
