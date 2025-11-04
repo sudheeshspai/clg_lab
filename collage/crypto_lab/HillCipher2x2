@@ -1,0 +1,189 @@
+import java.util.*;
+
+public class HillCipher2x2 {
+
+    private static final int MOD = 26;
+
+    // --- Core Encryption/Decryption ---
+
+    /**
+     * Encrypts a given plaintext with a 2x2 key matrix.
+     */
+    public static String encrypt(String plaintext, int[][] key) {
+        String preparedText = prepareText(plaintext);
+        StringBuilder ciphertext = new StringBuilder();
+
+        for (int i = 0; i < preparedText.length(); i += 2) {
+            // 1. Get the 2-letter block
+            int p1 = preparedText.charAt(i) - 'A';
+            int p2 = preparedText.charAt(i + 1) - 'A';
+
+            // 2. Create the plaintext vector
+            // P = [p1]
+            //     [p2]
+
+            // 3. Perform matrix multiplication: C = K * P
+            // c1 = (k11*p1 + k12*p2) % 26
+            // c2 = (k21*p1 + k22*p2) % 26
+            int c1 = (key[0][0] * p1 + key[0][1] * p2) % MOD;
+            int c2 = (key[1][0] * p1 + key[1][1] * p2) % MOD;
+            
+            // Ensure result is positive
+            c1 = (c1 + MOD) % MOD;
+            c2 = (c2 + MOD) % MOD;
+
+            // 4. Append the new characters
+            ciphertext.append((char) (c1 + 'A'));
+            ciphertext.append((char) (c2 + 'A'));
+        }
+
+        return ciphertext.toString();
+    }
+
+    /**
+     * Decrypts a given ciphertext with the original 2x2 key matrix.
+     */
+    public static String decrypt(String ciphertext, int[][] key) {
+        // 1. Find the inverse of the key matrix
+        int[][] inverseKey = getKeyInverse(key);
+
+        if (inverseKey == null) {
+            return "DECRYPTION FAILED: KEY IS NOT INVERTIBLE.";
+        }
+
+        // 2. Decryption is just encryption with the inverse key
+        return encrypt(ciphertext, inverseKey);
+    }
+
+    // --- Key and Matrix Helpers ---
+
+    /**
+     * Finds the full inverse of a 2x2 key matrix modulo 26.
+     * Returns null if the matrix is not invertible.
+     */
+    public static int[][] getKeyInverse(int[][] key) {
+        int a = key[0][0];
+        int b = key[0][1];
+        int c = key[1][0];
+        int d = key[1][1];
+
+        // 1. Calculate the determinant
+        int determinant = (a * d) - (b * c);
+        // Apply modulo, handling negative values
+        determinant = (determinant % MOD + MOD) % MOD;
+
+        // 2. Find the modular multiplicative inverse of the determinant
+        int detInverse = getModInverse(determinant, MOD);
+
+        if (detInverse == -1) {
+            // No inverse exists
+            return null;
+        }
+
+        // 3. Find the adjoint matrix
+        // adj(K) = [[d, -b],
+        //           [-c, a]]
+        // (We apply modulo 26 to each element)
+        int[][] adjoint = {
+                { (d % MOD + MOD) % MOD, (-b % MOD + MOD) % MOD },
+                { (-c % MOD + MOD) % MOD, (a % MOD + MOD) % MOD }
+        };
+
+        // 4. The inverse key is (detInverse * adjoint) % 26
+        int[][] inverseKey = new int[2][2];
+        inverseKey[0][0] = (detInverse * adjoint[0][0]) % MOD;
+        inverseKey[0][1] = (detInverse * adjoint[0][1]) % MOD;
+        inverseKey[1][0] = (detInverse * adjoint[1][0]) % MOD;
+        inverseKey[1][1] = (detInverse * adjoint[1][1]) % MOD;
+
+        return inverseKey;
+    }
+
+    /**
+     * Finds the modular multiplicative inverse of 'a' modulo 'm'.
+     * (a * x) % m == 1
+     * Returns -1 if no inverse exists.
+     */
+    public static int getModInverse(int a, int m) {
+        a = a % m;
+        // Brute-force search: find a number x such that (a * x) % m = 1
+        for (int x = 1; x < m; x++) {
+            if ((a * x) % m == 1) {
+                return x;
+            }
+        }
+        // No inverse exists (this happens if gcd(a, m) != 1)
+        return -1;
+    }
+
+    // --- Text Helper ---
+
+    /**
+     * Cleans text (uppercase, alpha-only) and pads it with 'X' to be even.
+     */
+    private static String prepareText(String text) {
+        // Remove non-alphabetic characters and convert to uppercase
+        String cleanText = text.toUpperCase().replaceAll("[^A-Z]", "");
+
+        // Pad with 'X' if the length is odd
+        if (cleanText.length() % 2 != 0) {
+            cleanText += "X";
+        }
+        return cleanText;
+    }
+
+    // --- Main Method (Interactive) ---
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // --- 1. Get Key Input ---
+        System.out.print("Enter a 4-letter key (e.g., DDCF): ");
+        String keyString = sc.nextLine().toUpperCase().replaceAll("[^A-Z]", "");
+
+        // Validate key length
+        if (keyString.length() != 4) {
+            System.out.println("Invalid key. Key must be 4 letters long.");
+            return;
+        }
+
+        // Convert the 4-letter string into a 2x2 matrix
+        int[][] keyMatrix = new int[2][2];
+        keyMatrix[0][0] = keyString.charAt(0) - 'A';
+        keyMatrix[0][1] = keyString.charAt(1) - 'A';
+        keyMatrix[1][0] = keyString.charAt(2) - 'A';
+        keyMatrix[1][1] = keyString.charAt(3) - 'A';
+
+        // --- 2. Check if Key is Valid ---
+        // We must check if the key is invertible *before* trying to use it.
+        if (getKeyInverse(keyMatrix) == null) {
+            System.out.println("\n--- ERROR ---");
+            System.out.println("The key '" + keyString + "' " + Arrays.deepToString(keyMatrix) + " is NOT invertible.");
+            System.out.println("The determinant has no modular inverse, so it cannot be used for decryption.");
+            System.out.println("Please try a different key (e.g., 'DDCF').");
+            return; // Exit the program
+        }
+
+        System.out.println("\nKey is valid!");
+        System.out.println("Key Matrix: " + Arrays.deepToString(keyMatrix));
+
+        // --- 3. Get Plaintext Input ---
+        System.out.print("\nEnter your message to encrypt: ");
+        String plaintext = sc.nextLine();
+
+        System.out.println("\nOriginal Plaintext: " + plaintext);
+        
+        // --- 4. Encrypt ---
+        System.out.println("\n--- Encrypting ---");
+        String ciphertext = encrypt(plaintext, keyMatrix);
+        System.out.println("Ciphertext: " + ciphertext);
+
+        // --- 5. Decrypt ---
+        System.out.println("\n--- Decrypting ---");
+        String decryptedText = decrypt(ciphertext, keyMatrix);
+        System.out.println("Decrypted Text: " + decryptedText);
+        System.out.println("----------------------------------");
+
+        sc.close();
+    }
+}
